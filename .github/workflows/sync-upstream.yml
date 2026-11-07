@@ -22,5 +22,13 @@ jobs:
           git remote add upstream https://github.com/huangxd-/danmu_api.git
           git fetch upstream
           git checkout main
-          git merge --no-edit upstream/main
+          git merge --no-ff --no-edit upstream/main
+          # GITHUB_TOKEN 无法推送工作流文件（GitHub 不允许 GitHub App
+          # 在没有 'workflows' 权限时创建/更新 workflow 文件，而该权限
+          # 不在 workflow 的 permissions 可选范围内），所以同步时跳过
+          # .github/workflows/，保留 fork 自身的工作流文件。
+          git checkout HEAD^1 -- .github/workflows/
+          if ! git diff --cached --quiet; then
+            git commit -m "chore: keep fork workflow files unchanged"
+          fi
           git push origin main
